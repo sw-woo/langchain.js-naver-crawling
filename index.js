@@ -43,8 +43,13 @@ async function main() {
 	logTimeWriteOutStep("GET request to Hacker News completed");
 	// 9. Check and create cache directory
 	const cacheDir = path.join("/Users/usermackbookpro/Desktop/Getting-Started-with-Langchain.JS-and-Unstructured.IO-main", "cache");
+
+	const recordDir = path.join("/Users/usermackbookpro/Desktop/Getting-Started-with-Langchain.JS-and-Unstructured.IO-main", "record");
 	if (!fs.existsSync(cacheDir)) {
 		fs.mkdirSync(cacheDir);
+	}
+	if (!fs.existsSync(recordDir)) {
+		fs.mkdirSync(recordDir);
 	}
 	logTimeWriteOutStep("Cache directory checked/created");
 	// 10. Save response data as an HTML file
@@ -83,6 +88,10 @@ async function main() {
 	// 15. Run QA Chain
 	const resp = await chain.call({query: config.query});
 	logTimeWriteOutStep("QA Response", resp.text);
+
+	const filePath2 = path.join(recordDir, "record.txt");
+	fs.writeFileSync(filePath2, resp.text);
+	logTimeWriteOutStep("Response data saved as HTML file");
 	// 16. End timing the execution
 	logTimeWriteOutStep("Execution timing ended");
 }
