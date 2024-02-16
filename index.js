@@ -51,14 +51,13 @@ async function main() {
 	const filePath = path.join(cacheDir, "response.html");
 	fs.writeFileSync(filePath, response.data);
 	logTimeWriteOutStep("Response data saved as HTML file");
-	// 11. Load HTML file using UnstructuredLoader
-	// const loader = new UnstructuredLoader(filePath, {apiKey: process.env.UNSTRUCTURED_API_KEY});
-	// const loadedData = await loader.load();
+	// 11. Load HTML file using CheerioWebBaseLoader
 	const loader = new CheerioWebBaseLoader(config.domain, {
 		selector: "li",
 	});
 	let loadedData = await loader.load();
 
+	//11-1. 한번에 많은 데이터 요청을 방지 하기위해서 스크래핑한 데이터 사이즈 조절과 임베딩을 위한 겹치는 부분설정
 	const splitter = new RecursiveCharacterTextSplitter({
 		chunkSize: 2000,
 		chunkOverlap: 100,
