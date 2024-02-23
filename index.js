@@ -1,4 +1,4 @@
-// 1. Import dependencies
+// 1. Import 라이브러리 및 패키지
 import axios from "axios";
 import {CheerioWebBaseLoader} from "langchain/document_loaders/web/cheerio";
 import {OpenAIEmbeddings} from "@langchain/openai";
@@ -11,52 +11,66 @@ import fs from "fs";
 import path from "path";
 import {RecursiveCharacterTextSplitter} from "langchain/text_splitter";
 
-// 2. Load environment variables
+import moment from "moment-timezone";
+
+// 2. dotenv 환경변수 설정
 dotenv.config();
-// 3. Configuration object
+// 3. 크롤링할 domain 주소와 query object 정의
 const config = {
 	domain: "https://news.naver.com/section/101",
 	query: "경제 부분 기사만 요약해줘",
 };
-// 4. Initialize global variables
+// 4.스텝 전역 변수 설정
 let currentStep = 1;
 const startTime = performance.now();
-// 5. Helper function to log messages with elapsed time and write out response
-function logTimeWriteOutStep(message, response = null) {
+// 5. 스텝과 시간 출력 함수
+function logTimeWriteOutStep(message) {
 	const elapsedTime = `[${((performance.now() - startTime) / 1000).toFixed(2)}s]`;
 	const logMessage = `${elapsedTime} Step ${currentStep}: ${message}`;
 	console.log(logMessage);
-	response ? console.log(response) : null;
 	currentStep += 1;
 }
+//5-1. 현재 한국 시간 출력 함수
+const getCurrentTime = () => {
+	var m = moment().tz("Asia/Seoul");
+	return m.format("YYYY-MM-DD HH:mm:ss");
+};
+
+console.log(getCurrentTime()); // 2022-08-04 00:01:40
+//6. 비동기 main()함수 정의및 실행
 async function main() {
-	// 6. Starting the main function
-	logTimeWriteOutStep("Starting main function");
-	// 7. Initialize OpenAI Embeddings
+	// 6. 비동기 main()함수 정의및 실행 logTimeWriteOutStep 시작
+	logTimeWriteOutStep("main 함수 시작");
+
+	// 7. OpenAI Embeddings 선언 및 할당
 	const embeddings = new OpenAIEmbeddings({
 		openAIApiKey: process.env.OPENAI_API_KEY,
 		batchSize: 512,
 	});
-	logTimeWriteOutStep("OpenAI Embeddings initialized");
-	// 8. Perform a GET request to the specified domain
-	const response = await axios.get(config.domain);
-	logTimeWriteOutStep("GET request to Hacker News completed");
-	// 9. Check and create cache directory
-	const cacheDir = path.join("/Users/usermackbookpro/Desktop/Getting-Started-with-Langchain.JS-and-Unstructured.IO-main", "cache");
 
+	logTimeWriteOutStep("OpenAI Embeddings 선언 및 할당 완료");
+	// 8. config 객체로 정의한 doamin 속성을 axios를 이용하여서 도메인에서 html 파일 가져오기
+	const response = await axios.get(config.domain);
+	logTimeWriteOutStep("axios를 이용하여서 도메인에서 html 파일 가져오기 완료! ");
+	// 9. 저장할 html 파일 위치 선언
+	const cacheDir = path.join("/Users/usermackbookpro/Desktop/Getting-Started-with-Langchain.JS-and-Unstructured.IO-main", "cache");
+	// 9. 최종 요약본 정리 파일 위치 선언
 	const recordDir = path.join("/Users/usermackbookpro/Desktop/Getting-Started-with-Langchain.JS-and-Unstructured.IO-main", "record");
+
+	// 10. 지정한 파일경로에 파일(디렉토리)가 존재하지 않는다면 파일(디렉토리) 생성
 	if (!fs.existsSync(cacheDir)) {
 		fs.mkdirSync(cacheDir);
 	}
 	if (!fs.existsSync(recordDir)) {
 		fs.mkdirSync(recordDir);
 	}
-	logTimeWriteOutStep("Cache directory checked/created");
-	// 10. Save response data as an HTML file
-	const filePath = path.join(cacheDir, "response.html");
+
+	logTimeWriteOutStep("cache/record 파일(디렉토리)생성 완료!");
+	// 10. aixos로 받아온 response.html 파일로 저장
+	const filePath = path.join(cacheDir, `${getCurrentTime()}-response.html`);
 	fs.writeFileSync(filePath, response.data);
-	logTimeWriteOutStep("Response data saved as HTML file");
-	// 11. Load HTML file using CheerioWebBaseLoader
+	logTimeWriteOutStep("aixos로 받아온 response.html 파일로 저장 완료!");
+	// 11. 인터넷 상에서  CheerioWebBaseLoader 객체에 크롤링 주소의 html에 li 태그만 가져오는 부분
 	const loader = new CheerioWebBaseLoader(config.domain, {
 		selector: "li",
 	});
@@ -70,13 +84,13 @@ async function main() {
 
 	const splitDocs = await splitter.splitDocuments(loadedData);
 
-	logTimeWriteOutStep("HTML file loaded");
+	logTimeWriteOutStep("HTML파일 로드 완료!");
 	console.log(splitDocs);
-	// 12. Convert loaded data into Document objects
+	// 12. Load한 데이터를 전부 Document 객체 형식으로 변환 {pageContent: item.pageContent, metadata: item.metadata}
 	let docs = splitDocs.map((item) => new Document({pageContent: item.pageContent, metadata: item.metadata}));
-	console.log(docs);
-	logTimeWriteOutStep("Loaded data converted into Document objects");
-	// 13. Generate embeddings and create a vector store
+	// console.log(docs);
+	logTimeWriteOutStep("모든 데이터를 Document 객체 형식으로 변환 완료");
+	// 13. 임베딩을 사용하여서 전체 docs데이터를 벡터화하여 벡터 DB 생성
 	const vectorStore = await HNSWLib.fromDocuments(docs, embeddings);
 	logTimeWriteOutStep("Vector store created with embeddings");
 	// 14. Set up QA Chain gpt-3.5-turbo or gpt-4 "
@@ -84,16 +98,16 @@ async function main() {
 	const chain = RetrievalQAChain.fromLLM(model, vectorStore.asRetriever(), {
 		returnSourceDocuments: true,
 	});
-	logTimeWriteOutStep("QA Chain set up");
+	logTimeWriteOutStep("model 과 Chain 셋팅 완료 요약 시작");
 	// 15. Run QA Chain
 	const resp = await chain.call({query: config.query});
-	logTimeWriteOutStep("QA Response", resp.text);
+	logTimeWriteOutStep(`QA Response:\n ${resp.text} `);
 
-	const filePath2 = path.join(recordDir, "record.txt");
+	const filePath2 = path.join(recordDir, `${getCurrentTime()}-record.txt`);
 	fs.writeFileSync(filePath2, resp.text);
-	logTimeWriteOutStep("Response data saved as HTML file");
-	// 16. End timing the execution
-	logTimeWriteOutStep("Execution timing ended");
+	logTimeWriteOutStep("요약 데이터 텍스타 파일 저장 완료");
+	// 16. 최종 실행 시간 출력
+	logTimeWriteOutStep("최종 실행 시간");
 }
-// 17. Run Main Function
+// 비동기 main 함수 호출
 main();
