@@ -15,9 +15,13 @@
 		"axios": "^1.6.4",
 		"cheerio": "^1.0.0-rc.12",
 		"dotenv": "^16.3.1",
+		"faiss-node": "^0.5.1",
 		"hnswlib-node": "^1.4.2",
 		"langchain": "^0.0.214",
-		"moment-timezone": "^0.5.45"
+		"moment-timezone": "^0.5.45",
+		"pdf-parse": "^1.1.1",
+		"puppeteer": "^19.11.1",
+		"sleep-promise": "^9.1.0"
 	},
 	"type": "module"
 }

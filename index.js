@@ -52,10 +52,11 @@ async function main() {
 	// 8. config 객체로 정의한 doamin 속성을 axios를 이용하여서 도메인에서 html 파일 가져오기
 	const response = await axios.get(config.domain);
 	logTimeWriteOutStep("axios를 이용하여서 도메인에서 html 파일 가져오기 완료! ");
+
 	// 9. 저장할 html 파일 위치 선언
-	const cacheDir = path.join("/Users/usermackbookpro/Desktop/Getting-Started-with-Langchain.JS-and-Unstructured.IO-main", "cache");
+	const cacheDir = path.join("/Users/usermackbookpro/Desktop/langcha.js-crawling", "cache");
 	// 9. 최종 요약본 정리 파일 위치 선언
-	const recordDir = path.join("/Users/usermackbookpro/Desktop/Getting-Started-with-Langchain.JS-and-Unstructured.IO-main", "record");
+	const recordDir = path.join("/Users/usermackbookpro/Desktop/langcha.js-crawling", "record");
 
 	// 10. 지정한 파일경로에 파일(디렉토리)가 존재하지 않는다면 파일(디렉토리) 생성
 	if (!fs.existsSync(cacheDir)) {
