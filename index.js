@@ -36,7 +36,8 @@ const getCurrentTime = () => {
 	return m.format("YYYY-MM-DD HH:mm:ss");
 };
 
-console.log(getCurrentTime()); // 2022-08-04 00:01:40
+// console.log(getCurrentTime()); // 2022-08-04 00:01:40
+
 //6. 비동기 main()함수 정의및 실행
 async function main() {
 	// 6. 비동기 main()함수 정의및 실행 logTimeWriteOutStep 시작

@@ -5,15 +5,11 @@ import moment from "moment-timezone";
 import sleep from "sleep-promise";
 import {PDFLoader} from "langchain/document_loaders/fs/pdf";
 import {OpenAIEmbeddings} from "@langchain/openai";
-import {FaissStore} from "@langchain/community/vectorstores/faiss";
-import {HNSWLib} from "@langchain/community/vectorstores/hnswlib";
 import dotenv from "dotenv";
-import {RecursiveCharacterTextSplitter} from "langchain/text_splitter";
-import {ChatOpenAI} from "@langchain/openai";
-import {RetrievalQAChain} from "langchain/chains";
 
 dotenv.config();
 
+// 퍼펫터를 사용하여 pdf파일로 크롤링하는 부분
 async function generatePDF(url, outputPath) {
 	const browser = await puppeteer.launch({headless: "shell"});
 	const page = await browser.newPage();
@@ -51,6 +47,7 @@ generatePDF(url, `${pdfDir}/${timeFileName}`)
 const docs = sleep(3000).then(() => {
 	const loader = new PDFLoader(`${pdfDir}/${timeFileName}`);
 	const docs = loader.load();
-	console.log(docs);
 	return docs;
 });
+
+console.log(`pdf loader 확인부분${docs}`);
