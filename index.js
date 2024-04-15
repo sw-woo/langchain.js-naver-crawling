@@ -18,7 +18,7 @@ dotenv.config();
 // 3. 크롤링할 domain 주소와 query object 정의
 const config = {
 	domain: "https://news.naver.com/section/101",
-	query: "경제 부분 기사만 요약해줘",
+	query: "경제 부분 기사를 최신순으로 상세히 약 500자 이상으로 요약해줘",
 };
 // 4.스텝 전역 변수 설정
 let currentStep = 1;

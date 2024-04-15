@@ -44,7 +44,7 @@ generatePDF(url, `${pdfDir}/${timeFileName}`)
 	.then(() => console.log("PDF generated successfully"))
 	.catch((err) => console.error("Error generating PDF:", err));
 
-const docs = sleep(3000).then(() => {
+const docs = sleep(4000).then(() => {
 	const loader = new PDFLoader(`${pdfDir}/${timeFileName}`);
 	const docs = loader.load();
 	return docs;
